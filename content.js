@@ -8,29 +8,23 @@ const websiteOptions = {
     {
       label: "Rewrite the Tweet",
       action: (selectedText) => {
-        makeApiCall(selectedText, "rewrite_tweet");
+        makeApiCall(selectedText, "Rewrite the Tweet in 240 characters");
       },
     },
     {
       label: "Create Reply",
       action: (selectedText) => {
-        makeApiCall(selectedText, "create_reply");
+        makeApiCall(selectedText, "Create the Tweet Reply in 240 characters");
       },
     },
   ],
-  "example.com": [
+  "linkedin.com": [
     {
-      label: "Option 1",
+      label: "Create Personalised Message",
       action: (selectedText) => {
-        makeApiCall(selectedText, "option_1");
+        makeApiCall(selectedText, "Create Personalised Linkedin Connection Message in 300 characters");
       },
-    },
-    {
-      label: "Option 2",
-      action: (selectedText) => {
-        makeApiCall(selectedText, "option_2");
-      },
-    },
+    }
   ],
 };
 
@@ -38,8 +32,22 @@ document.addEventListener("selectionchange", () => {
   clearTimeout(selectionTimeout);
   selectionTimeout = setTimeout(() => {
     const selection = window.getSelection().toString().trim();
-    const websiteDomain = window.location.hostname;
-    const options = websiteOptions[websiteDomain];
+    console.log("selection",selection)
+    const websiteDomain = window.location.hostname.replace("www.", "");
+    let options = websiteOptions[websiteDomain];
+    const isInputOrTextAreaSelectedVal=isInputOrTextAreaSelected();
+    console.log("isInputOrTextAreaSelectedVal",isInputOrTextAreaSelectedVal)
+    if (isInputOrTextAreaSelected()) {
+      options = [
+        {
+          label: "Generate Content",
+          action: (selectedText) => {
+            makeApiCall(selectedText, "Generate Content For:");
+          },
+        },
+      ]
+    } 
+    console.log("websiteDomain",websiteDomain,options,selection)
     if (selection && options) {
       if (!ui) {
         ui = document.createElement("div");
@@ -53,11 +61,25 @@ document.addEventListener("selectionchange", () => {
         ui.style.backgroundColor = "#fff";
         ui.style.borderRadius = "5px";
         ui.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+        
+        // Add a loader element to the UI
+        const loader = document.createElement("div");
+        loader.style.display = "none";
+        loader.textContent = "Fetching Data...";
+        ui.appendChild(loader);
+
+
         options.forEach((option) => {
           const button = document.createElement("button");
           button.style.margin = "5px";
           button.textContent = option.label;
           button.addEventListener("click", () => {
+            // Show the loader when making an API call
+            loader.style.display = "block";
+            // option.action(selection).then(() => {
+            //   // Hide the loader when the API call is complete
+            //   loader.style.display = "none";
+            // });
             option.action(selection);
           });
           ui.appendChild(button);
@@ -74,6 +96,29 @@ document.addEventListener("selectionchange", () => {
         ui = null;
       }
     }
+
+    function isInputOrTextAreaSelected() {
+      const selectedNode = window.getSelection().anchorNode;
+      if (!selectedNode) return false;
+      //console.log("selectedNode",selectedNode)
+
+    
+      const parentElement = selectedNode.parentElement;
+      if (!parentElement) return false;
+    
+      const childElements = parentElement.getElementsByTagName("*");
+      for (let i = 0; i < childElements.length; i++) {
+        const tagName = childElements[i].tagName.toLowerCase();
+       // console.log("tagName",tagName)
+
+        if (tagName === "input" || tagName === "textarea") {
+          return true;
+        }
+      }
+    
+      return false;
+    }
+
   }, 200);
 });
 
@@ -93,7 +138,7 @@ function makeApiCall(selectedText, option) {
       return;
     }
     const model = "gpt-3.5-turbo"
-    const messages=  [{"role": "user", "content": option+":\n"+selectedText}]
+    const messages=  [{"role": "user", "content": option+":\n"+selectedText+":\n"}]
     const data1 = {
       messages,model
     };

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "My Extension",
+  "name": "Smart Select",
   "version": "1.0",
   "background": {
     "service_worker": "background.js"

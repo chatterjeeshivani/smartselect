@@ -6,7 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.message === "getApiKey") {
-    chrome.storage.local.get("api_key", result => {
+    chrome.storage.local.get("api_key_smartselect", result => {
       const apiKey = result.api_key;
       if (apiKey) {
         console.log("API key found:", apiKey);

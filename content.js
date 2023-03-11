@@ -91,10 +91,13 @@ document.addEventListener("selectionchange", () => {
           button.addEventListener("click", () => {
             // Show the loader when making an API call
             loader.style.display = "block";
-            option.action(selection).then(() => {
+            const promise = option.action(selection);
+          if (promise && typeof promise.then === "function") {
+            promise.then(() => {
               // Hide the loader when the API call is complete
               loader.style.display = "none";
             });
+          }
           });
           ui.appendChild(button);
         });
@@ -147,8 +150,8 @@ document.addEventListener("mousedown", (event) => {
 // Make API call
 function makeApiCall(selectedText, option) {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
-  chrome.storage.sync.get("api_key", function(data) {
-    if (!data.api_key) {
+  chrome.storage.sync.get("api_key_smartselect", function(data) {
+    if (!data.api_key_smartselect) {
       console.error("API key not found");
       return;
     }
@@ -161,7 +164,7 @@ function makeApiCall(selectedText, option) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer "+data.api_key,
+        "Authorization": "Bearer "+data.api_key_smartselect,
       },
       body: JSON.stringify(data1),
     })
@@ -196,8 +199,8 @@ function showResult(result) {
     resultText.textContent = result;
     resultText.style.margin = "0 0 10px 0";
     resultText.style.textAlign = "center";
-    resultText.style.fontSize = "24px";
-    resultText.style.fontWeight = "bold";
+    resultText.style.fontSize = "20px";
+    //resultText.style.fontWeight = "bold";
     result_ui.appendChild(resultText);
 
     const buttonContainer = document.createElement("div");

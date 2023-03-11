@@ -1,12 +1,12 @@
 // Get the elements for the input box, save button, and change button
-var apiKeyInput = document.getElementById("api_key");
+var apiKeyInput = document.getElementById("api_key_smartselect");
 var saveButton = document.getElementById("save_button");
 var changeButton = document.getElementById("change_button");
 var statusMessage = document.getElementById("status_message");
 
 // Load the saved API key if it exists
-chrome.storage.sync.get("api_key", function(data) {
-  if (data.api_key) {
+chrome.storage.sync.get("api_key_smartselect", function(data) {
+  if (data.api_key_smartselect) {
     // Hide the input box and save button
     apiKeyInput.style.display = "none";
     saveButton.style.display = "none";
@@ -17,10 +17,10 @@ chrome.storage.sync.get("api_key", function(data) {
 
 // Save the API key when the user clicks the save button
 saveButton.addEventListener("click", function() {
-  var apiKey = apiKeyInput.value;
-  if (apiKey) {
+  var api_key_smartselect = apiKeyInput.value;
+  if (api_key_smartselect) {
     // Save the API key to Chrome storage
-    chrome.storage.sync.set({ "api_key": apiKey }, function() {
+    chrome.storage.sync.set({ "api_key_smartselect": api_key_smartselect }, function() {
       // Hide the input box and save button
       apiKeyInput.style.display = "none";
       saveButton.style.display = "none";
@@ -47,5 +47,5 @@ changeButton.addEventListener("click", function() {
   // Hide the change button
   changeButton.style.display = "none";
   // Clear the API key from Chrome storage
-  chrome.storage.sync.remove("api_key");
+  chrome.storage.sync.remove("api_key_smartselect");
 });

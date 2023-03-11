@@ -1,11 +1,46 @@
 let selectionTimeout;
 let ui;
+let result_ui;
+
+// Map website domains to options
+const websiteOptions = {
+  "twitter.com": [
+    {
+      label: "Rewrite the Tweet",
+      action: (selectedText) => {
+        makeApiCall(selectedText, "rewrite_tweet");
+      },
+    },
+    {
+      label: "Create Reply",
+      action: (selectedText) => {
+        makeApiCall(selectedText, "create_reply");
+      },
+    },
+  ],
+  "example.com": [
+    {
+      label: "Option 1",
+      action: (selectedText) => {
+        makeApiCall(selectedText, "option_1");
+      },
+    },
+    {
+      label: "Option 2",
+      action: (selectedText) => {
+        makeApiCall(selectedText, "option_2");
+      },
+    },
+  ],
+};
 
 document.addEventListener("selectionchange", () => {
   clearTimeout(selectionTimeout);
   selectionTimeout = setTimeout(() => {
     const selection = window.getSelection().toString().trim();
-    if (selection) {
+    const websiteDomain = window.location.hostname;
+    const options = websiteOptions[websiteDomain];
+    if (selection && options) {
       if (!ui) {
         ui = document.createElement("div");
         ui.style.position = "absolute";
@@ -18,7 +53,15 @@ document.addEventListener("selectionchange", () => {
         ui.style.backgroundColor = "#fff";
         ui.style.borderRadius = "5px";
         ui.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
-        ui.innerHTML = "<button style='margin: 5px;'>Option 1</button><button style='margin: 5px;'>Option 2</button>";
+        options.forEach((option) => {
+          const button = document.createElement("button");
+          button.style.margin = "5px";
+          button.textContent = option.label;
+          button.addEventListener("click", () => {
+            option.action(selection);
+          });
+          ui.appendChild(button);
+        });
         document.body.appendChild(ui);
       }
       const range = window.getSelection().getRangeAt(0);
@@ -40,3 +83,81 @@ document.addEventListener("mousedown", (event) => {
     ui = null;
   }
 });
+
+// Make API call
+function makeApiCall(selectedText, option) {
+  const apiUrl = "https://api.openai.com/v1/chat/completions";
+  chrome.storage.sync.get("api_key", function(data) {
+    if (!data.api_key) {
+      console.error("API key not found");
+      return;
+    }
+    const model = "gpt-3.5-turbo"
+    const messages=  [{"role": "user", "content": option+":\n"+selectedText}]
+    const data1 = {
+      messages,model
+    };
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer "+data.api_key,
+      },
+      body: JSON.stringify(data1),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        showResult(result.choices[0].message.content);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+}
+
+
+function showResult(result) {
+  if (!result_ui) {
+    result_ui = document.createElement("div");
+    result_ui.style.position = "absolute";
+    result_ui.style.top = "0";
+    result_ui.style.left = "0";
+    result_ui.style.zIndex = "99999";
+    result_ui.style.display = "flex";
+    result_ui.style.flexDirection = "column";
+    result_ui.style.alignItems = "center";
+    result_ui.style.backgroundColor = "#fff";
+    result_ui.style.borderRadius = "5px";
+    result_ui.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+
+    const resultText = document.createElement("p");
+    resultText.textContent = result;
+    result_ui.appendChild(resultText);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.display = "flex";
+    buttonContainer.style.marginTop = "10px";
+
+    const copyButton = document.createElement("button");
+    copyButton.textContent = "Copy to Clipboard";
+    copyButton.addEventListener("click", () => {
+      navigator.clipboard.writeText(result);
+      copyButton.textContent = "Copied!";
+      setTimeout(() => {
+        copyButton.textContent = "Copy to Clipboard";
+      }, 2000);
+    });
+    buttonContainer.appendChild(copyButton);
+
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", () => {
+      result_ui.remove();
+      result_ui = null;
+    });
+    buttonContainer.appendChild(closeButton);
+
+    result_ui.appendChild(buttonContainer);
+    document.body.appendChild(result_ui);
+  }
+}

@@ -14,7 +14,7 @@ const websiteOptions = {
     {
       label: "Create Reply",
       action: (selectedText) => {
-        makeApiCall(selectedText, "Create the Tweet Reply in 240 characters");
+        makeApiCall(selectedText, "Create the Reply to this Tweet in 240 characters");
       },
     },
   ],
@@ -23,6 +23,12 @@ const websiteOptions = {
       label: "Create Personalised Message",
       action: (selectedText) => {
         makeApiCall(selectedText, "Create Personalised Linkedin Connection Message in 300 characters");
+      },
+    },
+    {
+      label: "Create Reply",
+      action: (selectedText) => {
+        makeApiCall(selectedText, "Create the Reply to this Linkedin Message in 300 characters");
       },
     }
   ],
@@ -75,6 +81,12 @@ document.addEventListener("selectionchange", () => {
         options.forEach((option) => {
           const button = document.createElement("button");
           button.style.margin = "5px";
+          button.style.backgroundColor = "#4CAF50";
+          button.style.color = "white";
+          button.style.padding = "10px 24px";
+          button.style.border = "none";
+          button.style.borderRadius = "4px";
+          button.style.cursor = "pointer";
           button.textContent = option.label;
           button.addEventListener("click", () => {
             // Show the loader when making an API call
@@ -86,12 +98,13 @@ document.addEventListener("selectionchange", () => {
           });
           ui.appendChild(button);
         });
+        
         document.body.appendChild(ui);
       }
-      const range = window.getSelection().getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      ui.style.top = `${rect.bottom}px`;
-      ui.style.left = `${rect.right + 10}px`;
+      // const range = window.getSelection().getRangeAt(0);
+      // const rect = range.getBoundingClientRect();
+      // ui.style.top = `${rect.bottom}px`;
+      // ui.style.left = `${rect.right + 10}px`;
     } else {
       if (ui) {
         ui.remove();
@@ -162,42 +175,61 @@ function makeApiCall(selectedText, option) {
   });
 }
 
-
 function showResult(result) {
   if (!result_ui) {
     result_ui = document.createElement("div");
-    result_ui.style.position = "absolute";
+    result_ui.style.position = "fixed";
     result_ui.style.top = "0";
     result_ui.style.left = "0";
+    result_ui.style.right = "0";
     result_ui.style.zIndex = "99999";
     result_ui.style.display = "flex";
     result_ui.style.flexDirection = "column";
     result_ui.style.alignItems = "center";
     result_ui.style.backgroundColor = "#fff";
     result_ui.style.borderRadius = "5px";
-    result_ui.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+    result_ui.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.5)";
+    result_ui.style.padding = "20px";
+    result_ui.style.width = "100%";
 
     const resultText = document.createElement("p");
     resultText.textContent = result;
+    resultText.style.margin = "0 0 10px 0";
+    resultText.style.textAlign = "center";
+    resultText.style.fontSize = "24px";
+    resultText.style.fontWeight = "bold";
     result_ui.appendChild(resultText);
 
     const buttonContainer = document.createElement("div");
     buttonContainer.style.display = "flex";
-    buttonContainer.style.marginTop = "10px";
+    buttonContainer.style.justifyContent = "center";
 
     const copyButton = document.createElement("button");
     copyButton.textContent = "Copy to Clipboard";
+    copyButton.style.backgroundColor = "#4CAF50";
+    copyButton.style.color = "white";
+    copyButton.style.padding = "10px 24px";
+    copyButton.style.border = "none";
+    copyButton.style.borderRadius = "4px";
+    copyButton.style.marginRight = "10px";
+    copyButton.style.cursor = "pointer";
     copyButton.addEventListener("click", () => {
       navigator.clipboard.writeText(result);
       copyButton.textContent = "Copied!";
       setTimeout(() => {
         copyButton.textContent = "Copy to Clipboard";
-      }, 2000);
+      }, 3000);
     });
     buttonContainer.appendChild(copyButton);
 
     const closeButton = document.createElement("button");
     closeButton.textContent = "Close";
+    closeButton.style.backgroundColor = "#f44336";
+    closeButton.style.color = "white";
+    closeButton.style.padding = "10px 24px";
+    closeButton.style.border = "none";
+    closeButton.style.borderRadius = "4px";
+    closeButton.style.cursor = "pointer";
     closeButton.addEventListener("click", () => {
       result_ui.remove();
       result_ui = null;

@@ -31,6 +31,7 @@ const websiteOptions = {
 document.addEventListener("selectionchange", () => {
   clearTimeout(selectionTimeout);
   selectionTimeout = setTimeout(() => {
+    const selectedUI = window.getSelection()//.anchorNode.parentElement;
     const selection = window.getSelection().toString().trim();
     console.log("selection",selection)
     const websiteDomain = window.location.hostname.replace("www.", "");
@@ -52,8 +53,6 @@ document.addEventListener("selectionchange", () => {
       if (!ui) {
         ui = document.createElement("div");
         ui.style.position = "absolute";
-        ui.style.top = "0";
-        ui.style.left = "0";
         ui.style.zIndex = "99999";
         ui.style.display = "flex";
         ui.style.flexDirection = "column";
@@ -61,14 +60,18 @@ document.addEventListener("selectionchange", () => {
         ui.style.backgroundColor = "#fff";
         ui.style.borderRadius = "5px";
         ui.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
-        
+      
         // Add a loader element to the UI
         const loader = document.createElement("div");
         loader.style.display = "none";
         loader.textContent = "Fetching Data...";
         ui.appendChild(loader);
-
-
+      
+        // Get the coordinates of the selected text
+        const selectionCoords = selectedUI.getRangeAt(0).getBoundingClientRect();
+        ui.style.top = `${window.pageYOffset + selectionCoords.bottom}px`;
+        ui.style.left = `${window.pageXOffset + (selectionCoords.left + selectionCoords.right) / 2}px`;
+      
         options.forEach((option) => {
           const button = document.createElement("button");
           button.style.margin = "5px";
@@ -76,11 +79,10 @@ document.addEventListener("selectionchange", () => {
           button.addEventListener("click", () => {
             // Show the loader when making an API call
             loader.style.display = "block";
-            // option.action(selection).then(() => {
-            //   // Hide the loader when the API call is complete
-            //   loader.style.display = "none";
-            // });
-            option.action(selection);
+            option.action(selection).then(() => {
+              // Hide the loader when the API call is complete
+              loader.style.display = "none";
+            });
           });
           ui.appendChild(button);
         });

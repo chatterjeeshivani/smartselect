@@ -151,7 +151,9 @@ document.addEventListener("mousedown", (event) => {
 function makeApiCall(selectedText, option) {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   chrome.storage.sync.get("api_key_smartselect", function(data) {
-    if (!data.api_key_smartselect) {
+    var api_key_smartselect = data && data.api_key_smartselect ? data.api_key_smartselect : "";
+
+    if (!api_key_smartselect) {
       console.error("API key not found");
       return;
     }
@@ -164,7 +166,7 @@ function makeApiCall(selectedText, option) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer "+data.api_key_smartselect,
+        "Authorization": "Bearer "+api_key_smartselect,
       },
       body: JSON.stringify(data1),
     })

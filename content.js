@@ -154,7 +154,29 @@ function makeApiCall(selectedText, option) {
     var api_key_smartselect = data && data.api_key_smartselect ? data.api_key_smartselect : "";
 
     if (!api_key_smartselect) {
-      console.error("API key not found");
+      console.log("API key not found");
+
+    //   var popupURL = chrome.runtime.getURL('popup.html');
+
+    // // Open the HTML file in a new tab
+    // chrome.tabs.create({ url: popupURL });
+
+
+      if(ui){
+      const loader = document.createElement("div");
+      loader.textContent = "API Key Not Present.Please add the key from openai console in the extension popup and try again";
+      loader.style.fontSize = "18px";
+      loader.style.fontWeight = "bold";
+      loader.style.color = "#333";
+      loader.style.padding = "20px";
+      loader.style.textAlign = "center";
+      loader.style.border = "2px solid #ccc";
+      loader.style.borderRadius = "5px";
+      loader.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.3)";
+      loader.style.margin = "50px auto";
+      loader.style.width = "80%";
+      ui.appendChild(loader);
+      }
       return;
     }
     const model = "gpt-3.5-turbo"
